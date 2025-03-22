@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PaperPlaneIcon } from 'lucide-react';
+import { Send } from 'lucide-react';
 
 interface Message {
   id: number;
@@ -89,7 +89,7 @@ export const Chatbot: React.FC = () => {
           disabled={isLoading}
         />
         <Button type="submit" disabled={isLoading || !input.trim()}>
-          <PaperPlaneIcon size={18} />
+          <Send size={18} />
         </Button>
       </form>
     </div>
