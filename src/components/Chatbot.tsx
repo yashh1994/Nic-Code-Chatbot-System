@@ -48,6 +48,16 @@ export const Chatbot: React.FC = () => {
     }
   };
 
+  // Function to format the bot's response text
+  const formatBotResponse = (text: string) => {
+    // Look for patterns like **NIC Code:** and **Explanation:**
+    const formattedText = text
+      .replace(/\*\*NIC Code:\*\*/g, '<strong>NIC Code:</strong>')
+      .replace(/\*\*Explanation:\*\*/g, '<strong>Explanation:</strong>');
+    
+    return <div dangerouslySetInnerHTML={{ __html: formattedText }} />;
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -98,7 +108,7 @@ export const Chatbot: React.FC = () => {
               key={message.id} 
               className={message.sender === 'user' ? 'user-message' : 'bot-message'}
             >
-              {message.text}
+              {message.sender === 'bot' ? formatBotResponse(message.text) : message.text}
             </div>
           ))}
           
