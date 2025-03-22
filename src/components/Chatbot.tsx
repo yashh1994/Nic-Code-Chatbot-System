@@ -26,7 +26,35 @@ export const Chatbot: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const getUserMessages = (): string[] => {
+    return messages
+      .filter(message => message.sender === 'user')
+      .map(message => message.text);
+  };
+
+  const fetchNicCodeData = async (userMessages: string[]) => {
+    try {
+      const response = await fetch('https://nic-code-api.onrender.com/get-nic', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ desc: userMessages })
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      return data.res;
+    } catch (error) {
+      console.error('Error fetching NIC code data:', error);
+      return 'Sorry, I encountered an error while processing your request. Please try again later.';
+    }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
     
@@ -36,16 +64,32 @@ export const Chatbot: React.FC = () => {
     setInput('');
     setIsLoading(true);
     
-    // Simulate bot response after 4 seconds
-    setTimeout(() => {
+    // Get all user messages and send to API
+    const userMessages = [...getUserMessages(), input];
+    
+    try {
+      const response = await fetchNicCodeData(userMessages);
+      
       const botResponse = { 
         id: Date.now(), 
-        text: "Thank you for your question. NIC (National Industrial Classification) codes are standardized codes used to classify businesses by their economic activity. They're essential for regulatory compliance, statistical reporting, and economic analysis. Is there anything specific about NIC codes you'd like to know?", 
+        text: response, 
         sender: 'bot' as const 
       };
+      
       setMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      console.error('Error in chat interaction:', error);
+      
+      const errorResponse = { 
+        id: Date.now(), 
+        text: "I'm sorry, I couldn't process your request. Please try again later.", 
+        sender: 'bot' as const 
+      };
+      
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsLoading(false);
-    }, 4000);
+    }
   };
 
   return (
