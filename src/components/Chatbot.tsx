@@ -26,20 +26,14 @@ export const Chatbot: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const getUserMessages = (): string[] => {
-    return messages
-      .filter(message => message.sender === 'user')
-      .map(message => message.text);
-  };
-
-  const fetchNicCodeData = async (userMessages: string[]) => {
+  const fetchNicCodeData = async (userMessage: string) => {
     try {
       const response = await fetch('https://nic-code-api.onrender.com/get-nic', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ desc: userMessages })
+        body: JSON.stringify({ desc: [userMessage] })
       });
 
       if (!response.ok) {
@@ -64,11 +58,9 @@ export const Chatbot: React.FC = () => {
     setInput('');
     setIsLoading(true);
     
-    // Get all user messages and send to API
-    const userMessages = [...getUserMessages(), input];
-    
+    // Only send the latest user message to the API
     try {
-      const response = await fetchNicCodeData(userMessages);
+      const response = await fetchNicCodeData(input);
       
       const botResponse = { 
         id: Date.now(), 
